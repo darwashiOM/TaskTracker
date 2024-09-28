@@ -495,3 +495,41 @@ button {
   height: 80px;
   resize: none;
 }
+
+#google-sign-in,
+#sign-out {
+  display: inline-block;
+  background-color: #49beb7; /* Match the background color of the Add button */
+  color: #fff; /* White text */
+  border: none; /* No border */
+  border-radius: 4px; /* Rounded corners */
+  padding: 10px 20px; /* Padding around the button */
+  font-size: 16px; /* Font size for text */
+  cursor: pointer; /* Pointer cursor on hover */
+  margin-top: 20px; /* Add some space at the top */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 50px; /* Space below the Add button */
+  font-family: inherit; /* Use the same font as the Add button */
+}
+
+#sign-out {
+  background-color: var(--tag-color-text-three);
+}
+
+#google-sign-in:hover {
+  background-color: #3aa9a2; /* Match the hover effect of the Add button */
+}
+
+#sign-out:hover {
+  background-color: #f5717e; /* Match the hover effect of the Add button */
+}
+
+#google-sign-in img,
+#sign-out img {
+  height: 24px; /* Height of the Google logo */
+  width: 24px; /* Width of the Google logo */
+  margin-right: 10px; /* Space between the logo and text */
+}

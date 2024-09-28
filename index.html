@@ -9,6 +9,13 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css"
       rel="stylesheet"
     />
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+      import { getAuth } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
+      import { getFirestore } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+    </script>
+    <script type="module" src="config.js"></script>
+    <script type="module" src="auth.js"></script>
   </head>
   <body>
     <link
@@ -88,6 +95,12 @@
             <!-- Submit Button -->
             <button type="submit" id="addButton">Add</button>
           </div>
+          <button id="google-sign-in" style="display: none">
+            Sign in with Google
+          </button>
+          <button id="sign-out" style="display: none">
+            Sign Out from Google
+          </button>
         </div>
       </div>
       <div class="page-content">
