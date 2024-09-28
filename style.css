@@ -27,7 +27,6 @@
 }
 
 body,
-.item,
 .top-part,
 .top-part .count {
   display: flex;
@@ -105,25 +104,8 @@ button {
   padding: 40px;
 }
 
-.item {
-  color: var(--main-color);
-  margin-bottom: 14px;
-  font-weight: 500;
-}
-
-.item svg {
-  width: 14px;
-  height: 14px;
-  color: currentcolor;
-  margin-right: 10px;
-}
-
 .category-list {
   margin-top: 50px;
-}
-
-.category-list .item {
-  color: var(--secondary-color);
 }
 
 .actions {
@@ -244,19 +226,6 @@ button {
   cursor: pointer;
 }
 
-.members {
-  display: flex;
-  margin-top: 14px;
-}
-
-.members img {
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  margin-right: 4px;
-  object-fit: cover;
-}
-
 .page-content {
   display: flex;
   flex-direction: column;
@@ -289,14 +258,6 @@ button {
   transition: 0.4s ease-in;
   padding: 20px 30px;
   cursor: pointer;
-}
-
-#opt-1:checked + label,
-#opt-2:checked + label,
-#opt-3:checked + label,
-#opt-4:checked + label {
-  color: var(--checkbox-color);
-  border-bottom: 2px solid var(--checkbox-color);
 }
 
 .task-item {
@@ -348,7 +309,6 @@ label .label-text:before {
 .task-item:checked + label .label-text:before {
   background-color: var(--checkbox-color);
   border: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-check'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-size: 10px;
   background-position: center;
@@ -422,4 +382,51 @@ label .label-text:before {
   .category {
     padding: 20px;
   }
+}
+
+.task-event-form {
+  margin-top: 100px; /* Space below the menu items */
+  padding: 20px;
+  background: #f5f8ff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.task-event-form label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #353536;
+  margin-bottom: 8px;
+}
+
+.task-event-form select,
+.task-event-form input {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  margin-bottom: 15px; /* Space between elements */
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  outline: none;
+}
+
+.task-event-form select:focus,
+.task-event-form input:focus {
+  border-color: #49beb7;
+}
+
+#addButton {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  background-color: #49beb7;
+  color: #fff;
+  cursor: pointer;
+}
+
+#addButton:hover {
+  background-color: #41a49f;
 }
