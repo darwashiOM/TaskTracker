@@ -65,28 +65,31 @@ const tasksWrapper = document.querySelector(".tasks-wrapper");
 
 function createTaskTemplate(task) {
   return `
-      <div class="task">
-        <input
-          class="task-item"
-          name="task"
-          type="checkbox"
-          id="${task.id}"
-          ${task.checked ? "checked" : ""}
-        />
-        <label for="${task.id}">
-          <span class="label-text">${task.name}</span>
-        </label>
-        <span class="tag ${task.statusClass}">${task.status}</span>
-        <div class="task-options">
-            <button class="options-button">⋮</button>
-            <div class="options-menu">
-                <button class="option change-status">Change Status</button>
-                <button class="option mark-complete">Mark as Completed</button>
-                <button class="option delete-task">Delete</button>
-            </div>
+        <div class="task ${task.checked ? "completed" : ""}">
+          <input
+            class="task-item"
+            name="task"
+            type="checkbox"
+            id="${task.id}"
+            ${task.checked ? "checked" : ""}
+          />
+          <label for="${task.id}">
+            <span class="label-text">${task.name}</span>
+          </label>
+          <span class="tag ${task.statusClass}">${task.status}</span>
+          <div class="task-options">
+              <button class="options-button">⋮</button>
+              <div class="options-menu">
+                  <button class="option change-name">Change Name</button>
+                  <button class="option change-status">Change Status</button>
+                  <button class="option mark-complete">${
+                    task.checked ? "Uncheck" : "Mark as Completed"
+                  }</button>
+                  <button class="option delete-task">Delete</button>
+              </div>
+          </div>
         </div>
-      </div>
-    `;
+      `;
 }
 
 function renderTasks(tasks) {
@@ -102,8 +105,10 @@ function addTasks(task) {
       "beforebegin",
       createTaskTemplate(task)
     );
+    currentTasks.push(task);
   } else {
     tasksWrapper.innerHTML += createTaskTemplate(task);
+    upcomingTasks.push(task);
   }
 }
 
@@ -142,20 +147,6 @@ function renderAddingMenu() {
     noteFields.style.display = "block";
   }
 }
-document.addEventListener("DOMContentLoaded", () => {
-  renderTasks(currentTasks);
-
-  const upcomingTasksHeader = document.createElement("div");
-  upcomingTasksHeader.classList.add("header", "upcoming");
-  upcomingTasksHeader.textContent = "Upcoming Tasks";
-  tasksWrapper.appendChild(upcomingTasksHeader);
-
-  renderTasks(upcomingTasks);
-  document.querySelector("#schedule-task-amount").innerHTML =
-    scheduleTasks.length;
-
-  renderScheduleTasks(scheduleTasks, ".right-content");
-});
 
 function determineStatusClass(taskStatus) {
   switch (taskStatus) {
@@ -175,7 +166,7 @@ addButton.addEventListener("click", () => {
   switch (taskEventSelect.value) {
     case "task":
       newTask = {
-        id: `item-${currentTasks.length + 1}`,
+        id: `item-${currentTasks.length + upcomingTasks.length + 1}`,
         name: taskName.value,
         status: taskStatus.value,
         statusClass: determineStatusClass(taskStatus.value),
@@ -189,4 +180,127 @@ addButton.addEventListener("click", () => {
     case "note":
       console.log("note");
   }
+});
+
+tasksWrapper.addEventListener("click", (event) => {
+  const taskElement = event.target.closest(".task");
+  if (!taskElement) return;
+
+  if (event.target.classList.contains("options-button")) {
+    const index = Array.from(document.querySelectorAll(".task")).indexOf(
+      taskElement
+    );
+    toggleOptionsMenu(index);
+  } else if (event.target.classList.contains("change-status")) {
+    changeTaskStatus(taskElement);
+  } else if (event.target.classList.contains("mark-complete")) {
+    if (taskElement.classList.contains("completed")) {
+      markTaskUnComplete(taskElement);
+    } else {
+      markTaskComplete(taskElement);
+    }
+  } else if (event.target.classList.contains("delete-task")) {
+    deleteTask(taskElement);
+  } else if (event.target.classList.contains("change-name")) {
+    editTaskName(taskElement);
+  }
+});
+
+function changeTaskStatus(taskElement) {
+  const newStatus = prompt(
+    "Enter new status (Approved, In Progress, In Review, Waiting):"
+  );
+  if (newStatus) {
+    const taskId = taskElement.querySelector(".task-item").id;
+    const task = findTaskById(taskId);
+    task.status = newStatus;
+    task.statusClass = determineStatusClass(newStatus);
+    taskElement.querySelector(".tag").textContent = newStatus;
+    taskElement.querySelector(".tag").className = `tag ${task.statusClass}`;
+  }
+}
+
+function toggleOptionsMenu(index) {
+  const optionsMenus = document.querySelectorAll(".options-menu");
+  optionsMenus.forEach((menu, menuIndex) => {
+    if (menuIndex !== index) {
+      menu.classList.remove("show");
+    }
+  });
+  const optionsMenu = optionsMenus[index];
+  if (optionsMenu) {
+    optionsMenu.classList.toggle("show");
+  }
+}
+
+function markTaskComplete(taskElement) {
+  const taskId = taskElement.querySelector(".task-item").id;
+  const task = findTaskById(taskId);
+  task.checked = true;
+  taskElement.classList.add("completed");
+  taskElement.querySelector(".task-item").checked = true;
+
+  const markCompleteButton = taskElement.querySelector(".mark-complete");
+  markCompleteButton.textContent = "Uncheck";
+}
+
+function markTaskUnComplete(taskElement) {
+  const taskId = taskElement.querySelector(".task-item").id;
+  const task = findTaskById(taskId);
+  task.checked = false;
+  taskElement.classList.remove("completed");
+  taskElement.querySelector(".task-item").checked = false;
+
+  const markCompleteButton = taskElement.querySelector(".mark-complete");
+  markCompleteButton.textContent = "Mark as Completed";
+}
+
+function deleteTask(taskElement) {
+  const taskId = taskElement.querySelector(".task-item").id;
+  const taskIndex = findTaskIndexById(taskId);
+
+  if (taskIndex !== -1) {
+    currentTasks.splice(taskIndex, 1);
+    taskElement.remove();
+  }
+}
+
+function editTaskName(taskElement) {
+  const newTaskName = prompt("Enter new task name:");
+  if (newTaskName) {
+    const taskId = taskElement.querySelector(".task-item").id;
+    const task = findTaskById(taskId);
+    task.name = newTaskName;
+    taskElement.querySelector(".label-text").textContent = newTaskName;
+  }
+}
+
+function findTaskById(id) {
+  return (
+    currentTasks.find((task) => task.id === id) ||
+    upcomingTasks.find((task) => task.id === id)
+  );
+}
+
+function findTaskIndexById(id) {
+  let index = currentTasks.findIndex((task) => task.id === id);
+  if (index === -1) {
+    index = upcomingTasks.findIndex((task) => task.id === id);
+  }
+  return index;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderTasks(currentTasks);
+
+  const upcomingTasksHeader = document.createElement("div");
+  upcomingTasksHeader.classList.add("header", "upcoming");
+  upcomingTasksHeader.textContent = "Upcoming Tasks";
+  tasksWrapper.appendChild(upcomingTasksHeader);
+
+  renderTasks(upcomingTasks);
+  document.querySelector("#schedule-task-amount").innerHTML =
+    scheduleTasks.length;
+
+  renderScheduleTasks(scheduleTasks, ".right-content");
 });

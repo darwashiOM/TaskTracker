@@ -350,6 +350,20 @@ button {
   background-color: #f0f0f0;
 }
 
+.task.completed {
+  text-decoration: line-through;
+  color: gray; /* Optional: change color to indicate completion */
+}
+
+.task.completed .label-text {
+  text-decoration: line-through; /* Add strikethrough to the task name */
+  color: gray; /* Optional: change color to indicate completion */
+}
+
+.task.completed .tag {
+  opacity: 0.5; /* Optional: reduce opacity of the status tag */
+}
+
 /* Show options menu when options button is clicked */
 .task-options .options-button:focus + .options-menu,
 .task-options .options-menu:hover {
