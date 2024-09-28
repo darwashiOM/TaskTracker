@@ -17,23 +17,60 @@
     />
     <div class="task-manager">
       <div class="left-bar">
-        <div class="upper-part">
-          <div class="actions">
-            <div class="circle"></div>
-            <div class="circle-2"></div>
-          </div>
-        </div>
         <div class="left-content">
           <div class="task-event-form">
             <label for="taskEventSelect">Choose an option:</label>
             <select id="taskEventSelect">
               <option value="task">Add Task</option>
-              <option value="event">Add Event</option>
+              <option value="meeting">Schedule Meeting</option>
+              <option value="note">Add Note</option>
             </select>
-            <label for="taskEventName">Name:</label>
-            <input type="text" id="taskEventName" placeholder="Enter name" />
-            <label for="eventDateTime">Date & Time:</label>
-            <input type="datetime-local" id="eventDateTime" />
+
+            <!-- Task Fields -->
+            <div id="taskFields">
+              <label for="taskName">Task Name:</label>
+              <input type="text" id="taskName" placeholder="task name" />
+
+              <label for="taskStatus">Status:</label>
+              <select id="taskStatus">
+                <option value="approved">Approved</option>
+                <option value="inProgress">In Progress</option>
+                <option value="review">In Review</option>
+                <option value="waiting">Waiting</option>
+              </select>
+            </div>
+
+            <!-- Meeting Fields -->
+            <div id="meetingFields" style="display: none">
+              <label for="meetingName">Meeting Name:</label>
+              <input type="text" id="meetingName" placeholder="meeting name" />
+
+              <label for="meetingTime">Time:</label>
+              <input type="time" id="meetingTime" />
+
+              <label for="meetingColor">Color:</label>
+              <select id="meetingColor">
+                <option value="yellow" class="yellow">Yellow</option>
+                <option value="blue" class="blue">Blue</option>
+                <option value="red" class="red">Red</option>
+                <option value="green" class="green">Green</option>
+              </select>
+            </div>
+
+            <!-- Note Fields -->
+            <div id="noteFields" style="display: none">
+              <label for="noteTitle">Note Title:</label>
+              <input
+                type="text"
+                id="noteTitle"
+                placeholder="Enter note title"
+              />
+
+              <label for="noteContent">Content:</label>
+              <textarea id="noteContent" placeholder="note content"></textarea>
+            </div>
+
+            <!-- Submit Button -->
             <button type="submit" id="addButton">Add</button>
           </div>
         </div>
@@ -44,16 +81,6 @@
           <div class="label-wrapper">
             <input class="nav-item" name="nav" type="radio" id="opt-1" />
             <label class="category" for="opt-1">All</label>
-          </div>
-          <div class="label-wrapper">
-            <input
-              class="nav-item"
-              name="nav"
-              type="radio"
-              id="opt-2"
-              checked
-            />
-            <label class="category" for="opt-2">Important</label>
           </div>
           <div class="label-wrapper">
             <input class="nav-item" name="nav" type="radio" id="opt-3" />
@@ -85,7 +112,7 @@
             <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
-          <div class="count">6</div>
+          <div class="count" id="schedule-task-amount"></div>
         </div>
         <div class="header">Schedule</div>
         <div class="right-content"></div>
