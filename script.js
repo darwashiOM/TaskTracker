@@ -57,6 +57,12 @@ let scheduleTasks = [
   },
 ];
 
+const addButton = document.querySelector("#addButton");
+const taskEventSelect = document.querySelector("#taskEventSelect");
+const taskName = document.querySelector("#taskName");
+const taskStatus = document.querySelector("#taskStatus");
+const tasksWrapper = document.querySelector(".tasks-wrapper");
+
 function createTaskTemplate(task) {
   return `
       <div class="task">
@@ -83,11 +89,22 @@ function createTaskTemplate(task) {
     `;
 }
 
-function renderTasks(tasks, containerSelector) {
-  const container = document.querySelector(containerSelector);
+function renderTasks(tasks) {
   tasks.forEach((task) => {
-    container.innerHTML += createTaskTemplate(task);
+    tasksWrapper.innerHTML += createTaskTemplate(task);
   });
+}
+
+function addTasks(task) {
+  const upcomingTasksHeader = document.querySelector("div.header.upcoming");
+  if (task.status != "Waiting") {
+    upcomingTasksHeader.insertAdjacentHTML(
+      "beforebegin",
+      createTaskTemplate(task)
+    );
+  } else {
+    tasksWrapper.innerHTML += createTaskTemplate(task);
+  }
 }
 
 function createScheduleTaskTemplate(task) {
@@ -126,18 +143,50 @@ function renderAddingMenu() {
   }
 }
 document.addEventListener("DOMContentLoaded", () => {
-  renderTasks(currentTasks, ".tasks-wrapper");
+  renderTasks(currentTasks);
 
   const upcomingTasksHeader = document.createElement("div");
   upcomingTasksHeader.classList.add("header", "upcoming");
   upcomingTasksHeader.textContent = "Upcoming Tasks";
-  document.querySelector(".tasks-wrapper").appendChild(upcomingTasksHeader);
+  tasksWrapper.appendChild(upcomingTasksHeader);
 
-  renderTasks(upcomingTasks, ".tasks-wrapper");
+  renderTasks(upcomingTasks);
   document.querySelector("#schedule-task-amount").innerHTML =
     scheduleTasks.length;
 
-  taskEventSelect.addEventListener("change", renderAddingMenu);
+  renderScheduleTasks(scheduleTasks, ".right-content");
 });
 
-renderScheduleTasks(scheduleTasks, ".right-content");
+function determineStatusClass(taskStatus) {
+  switch (taskStatus) {
+    case "Approved":
+      return "approved";
+    case "In Progress":
+      return "progress";
+    case "In Review":
+      return "review";
+    default:
+      return "waiting";
+  }
+}
+
+taskEventSelect.addEventListener("change", renderAddingMenu);
+addButton.addEventListener("click", () => {
+  switch (taskEventSelect.value) {
+    case "task":
+      newTask = {
+        id: `item-${currentTasks.length + 1}`,
+        name: taskName.value,
+        status: taskStatus.value,
+        statusClass: determineStatusClass(taskStatus.value),
+        checked: false,
+      };
+
+      addTasks(newTask);
+      break;
+    case "meeting":
+      console.log("meeting");
+    case "note":
+      console.log("note");
+  }
+});

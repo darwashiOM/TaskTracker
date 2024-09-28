@@ -29,24 +29,34 @@
             <!-- Task Fields -->
             <div id="taskFields">
               <label for="taskName">Task Name:</label>
-              <input type="text" id="taskName" placeholder="task name" />
+              <input
+                type="text"
+                id="taskName"
+                placeholder="task name"
+                required
+              />
 
               <label for="taskStatus">Status:</label>
               <select id="taskStatus">
-                <option value="approved">Approved</option>
-                <option value="inProgress">In Progress</option>
-                <option value="review">In Review</option>
-                <option value="waiting">Waiting</option>
+                <option value="Approved">Approved</option>
+                <option value="In Progress">In Progress</option>
+                <option value="In Review">In Review</option>
+                <option value="Waiting">Waiting</option>
               </select>
             </div>
 
             <!-- Meeting Fields -->
             <div id="meetingFields" style="display: none">
               <label for="meetingName">Meeting Name:</label>
-              <input type="text" id="meetingName" placeholder="meeting name" />
+              <input
+                type="text"
+                id="meetingName"
+                placeholder="meeting name"
+                required
+              />
 
               <label for="meetingTime">Time:</label>
-              <input type="time" id="meetingTime" />
+              <input type="time" id="meetingTime" required />
 
               <label for="meetingColor">Color:</label>
               <select id="meetingColor">
@@ -63,11 +73,16 @@
               <input
                 type="text"
                 id="noteTitle"
-                placeholder="Enter note title"
+                placeholder="note title"
+                required
               />
 
               <label for="noteContent">Content:</label>
-              <textarea id="noteContent" placeholder="note content"></textarea>
+              <textarea
+                id="noteContent"
+                placeholder="note content"
+                required
+              ></textarea>
             </div>
 
             <!-- Submit Button -->
