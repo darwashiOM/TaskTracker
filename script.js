@@ -1,43 +1,11 @@
-let currentTasks = [
-  {
-    id: "item-1",
-    name: "Dashboard Design Implementation",
-    status: "Approved",
-    statusClass: "approved",
-    checked: true,
-  },
-  {
-    id: "item-2",
-    name: "Create a userflow",
-    status: "In Progress",
-    statusClass: "progress",
-    checked: true,
-  },
-  {
-    id: "item-3",
-    name: "Application Implementation",
-    status: "In Review",
-    statusClass: "review",
-    checked: false,
-  },
-];
+import {
+  addTaskToFirestore,
+  updateTaskInFirestore,
+  deleteTaskFromFirestore,
+  currentUser,
+} from "./auth.js";
 
-let upcomingTasks = [
-  {
-    id: "item-4",
-    name: "Dashboard Design Implementation",
-    status: "Waiting",
-    statusClass: "waiting",
-    checked: false,
-  },
-  {
-    id: "item-5",
-    name: "Create a userflow",
-    status: "Waiting",
-    statusClass: "waiting",
-    checked: false,
-  },
-];
+let currentTasks = [];
 
 let scheduleTasks = [
   {
@@ -92,23 +60,30 @@ function createTaskTemplate(task) {
       `;
 }
 
-function renderTasks(tasks) {
-  tasks.forEach((task) => {
-    tasksWrapper.innerHTML += createTaskTemplate(task);
-  });
-}
+function generateUniqueID() {
+  const timestamp = Date.now();
+  const randomNum = Math.floor(Math.random() * 1e9);
+  const uniqueID = `${timestamp}-${randomNum}`;
 
-function addTasks(task) {
+  return uniqueID;
+}
+export function addTasks(task, addFirebae = true) {
   const upcomingTasksHeader = document.querySelector("div.header.upcoming");
   if (task.status != "Waiting") {
     upcomingTasksHeader.insertAdjacentHTML(
       "beforebegin",
       createTaskTemplate(task)
     );
-    currentTasks.push(task);
   } else {
     tasksWrapper.innerHTML += createTaskTemplate(task);
-    upcomingTasks.push(task);
+  }
+  currentTasks.push(task);
+
+  if (currentUser && addFirebae) {
+    console.log("happened");
+    addTaskToFirestore(task);
+  } else {
+    console.log("User is not signed in. Cannot add task to Firestore.");
   }
 }
 
@@ -165,8 +140,8 @@ taskEventSelect.addEventListener("change", renderAddingMenu);
 addButton.addEventListener("click", () => {
   switch (taskEventSelect.value) {
     case "task":
-      newTask = {
-        id: `item-${currentTasks.length + upcomingTasks.length + 1}`,
+      let newTask = {
+        id: `item-${generateUniqueID()}`,
         name: taskName.value,
         status: taskStatus.value,
         statusClass: determineStatusClass(taskStatus.value),
@@ -263,6 +238,10 @@ function deleteTask(taskElement) {
     currentTasks.splice(taskIndex, 1);
     taskElement.remove();
   }
+
+  if (currentUser) {
+    deleteTaskFromFirestore(taskId);
+  }
 }
 
 function editTaskName(taskElement) {
@@ -276,31 +255,17 @@ function editTaskName(taskElement) {
 }
 
 function findTaskById(id) {
-  return (
-    currentTasks.find((task) => task.id === id) ||
-    upcomingTasks.find((task) => task.id === id)
-  );
+  return currentTasks.find((task) => task.id === id);
 }
 
 function findTaskIndexById(id) {
   let index = currentTasks.findIndex((task) => task.id === id);
-  if (index === -1) {
-    index = upcomingTasks.findIndex((task) => task.id === id);
-  }
   return index;
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  renderTasks(currentTasks);
-
-  const upcomingTasksHeader = document.createElement("div");
-  upcomingTasksHeader.classList.add("header", "upcoming");
-  upcomingTasksHeader.textContent = "Upcoming Tasks";
-  tasksWrapper.appendChild(upcomingTasksHeader);
-
-  renderTasks(upcomingTasks);
+document.addEventListener("DOMContentLoaded", async () => {
   document.querySelector("#schedule-task-amount").innerHTML =
     scheduleTasks.length;
 
-  renderScheduleTasks(scheduleTasks, ".right-content");
+  //renderScheduleTasks(scheduleTasks, ".right-content");
 });
