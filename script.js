@@ -1,14 +1,16 @@
 import {
   addTaskToFirestore,
-  updateTaskInFirestore,
-  deleteTaskFromFirestore,
-  addMeetingToFirestore,
+  updateTaskInFirebase,
+  deleteTaskFromFirebase,
+  deleteMeetingFromFirebase,
+  addMeetingToFirebase,
+  updateMeetingInFirebase,
   currentUser,
 } from "./auth.js";
 
 let currentTasks = [];
 
-let scheduleTasks = [];
+let currentMeetings = [];
 
 const addButton = document.querySelector("#addButton");
 const taskEventSelect = document.querySelector("#taskEventSelect");
@@ -51,14 +53,26 @@ function createTaskTemplate(task) {
       `;
 }
 
-function createScheduleTaskTemplate(task) {
+function createScheduleTaskTemplate(meeting) {
   return `
-      <div class="task-box ${task.color}">
+      <div class="task-box ${meeting.checked ? "completed" : ""} 
+      ${meeting.color}" id="${meeting.id}">
         <div class="description-task">
-          <div class="time">${task.time}</div>
-          <div class="task-name">${task.name}</div>
+          <div class="time">${meeting.time}</div>
+          <div class="task-name">${meeting.name}</div>
         </div>
-        <div class="more-button"></div>
+        
+        <div class="task-options">
+          <button class="options-button" id="meeting-options">⋮</button>
+          <div class="options-menu">
+            <button class="option change-name">Change Name</button>
+            <button class="option change-color">Change Color</button>
+            <button class="option mark-complete">${
+              meeting.checked ? "Uncheck" : "Mark as Completed"
+            }</button>
+            <button class="option delete-task">Delete</button>
+          </div>
+        </div>
       </div>
     `;
 }
@@ -70,7 +84,7 @@ function generateUniqueID() {
 
   return uniqueID;
 }
-export function addTasks(task, addFirebae = true) {
+export function addTasks(task) {
   const upcomingTasksHeader = document.querySelector("div.header.upcoming");
   if (task.status != "Waiting") {
     upcomingTasksHeader.insertAdjacentHTML(
@@ -82,32 +96,20 @@ export function addTasks(task, addFirebae = true) {
   }
   currentTasks.push(task);
 
-  if (currentUser && addFirebae) {
-    console.log("happened");
+  if (currentUser) {
     addTaskToFirestore(task);
-  } else {
-    console.log("User is not signed in. Cannot add task to Firestore.");
   }
 }
 
-export function addMeeting(meeting, addFirebae = true) {
+export function addMeeting(meeting) {
   meetingWrapper.innerHTML += createScheduleTaskTemplate(meeting);
+  currentMeetings.push(meeting);
 
-  scheduleTasks.push(meeting);
-
-  if (currentUser && addFirebae) {
-    console.log("happened");
-    addMeetingToFirestore(meeting);
-  } else {
-    console.log("User is not signed in. Cannot add task to Firestore.");
+  if (currentUser) {
+    addMeetingToFirebase(meeting);
   }
-}
-
-function renderScheduleTasks(tasks, containerSelector) {
-  const container = document.querySelector(containerSelector);
-  tasks.forEach((task) => {
-    container.innerHTML += createScheduleTaskTemplate(task);
-  });
+  document.querySelector("#schedule-task-amount").innerHTML =
+    currentMeetings.length;
 }
 
 function renderAddingMenu() {
@@ -186,18 +188,7 @@ addButton.addEventListener("click", () => {
         checked: false,
       };
 
-      console.log(meetingStartTime.value);
-
       addMeeting(newMeeting);
-    case "note":
-      let newNote = {
-        id: `item-${generateUniqueID()}`,
-        name: meetingName.value,
-        time: determinTime(meetingStartTime.value, meetingEndTime.value),
-        color: meetingColor.value,
-        checked: false,
-      };
-      addNotes();
   }
 });
 
@@ -225,6 +216,30 @@ tasksWrapper.addEventListener("click", (event) => {
   }
 });
 
+meetingWrapper.addEventListener("click", (event) => {
+  const meetingElement = event.target.closest(".task-box");
+  if (!meetingElement) return;
+
+  if (event.target.classList.contains("more-button")) {
+    const index = Array.from(document.querySelectorAll(".task-box")).indexOf(
+      meetingElement
+    );
+    toggleOptionsMenu(index);
+  } else if (event.target.classList.contains("change-color")) {
+    changeMeetingColor(meetingElement);
+  } else if (event.target.classList.contains("mark-complete")) {
+    if (meetingElement.classList.contains("completed")) {
+      markMeetingUnComplete(meetingElement);
+    } else {
+      markMeetingComplete(meetingElement);
+    }
+  } else if (event.target.classList.contains("delete-task")) {
+    deleteMeeting(meetingElement);
+  } else if (event.target.classList.contains("change-name")) {
+    editMeetingName(meetingElement);
+  }
+});
+
 function changeTaskStatus(taskElement) {
   const newStatus = prompt(
     "Enter new status (Approved, In Progress, In Review, Waiting):"
@@ -236,6 +251,23 @@ function changeTaskStatus(taskElement) {
     task.statusClass = determineStatusClass(newStatus);
     taskElement.querySelector(".tag").textContent = newStatus;
     taskElement.querySelector(".tag").className = `tag ${task.statusClass}`;
+
+    if (currentUser) {
+      updateTaskInFirebase(taskId, task);
+    }
+  }
+}
+
+function changeMeetingColor(meetingElement) {
+  const newColor = prompt("Enter new color (red,, yellow, blue):");
+  if (newColor) {
+    meetingElement.className = `task-box ${newColor}`;
+
+    const meeting = findMeetingById(meetingElement.id);
+    meeting.color = newColor;
+    if (currentUser) {
+      updateMeetingInFirebase(meetingElement.id, meeting);
+    }
   }
 }
 
@@ -261,6 +293,10 @@ function markTaskComplete(taskElement) {
 
   const markCompleteButton = taskElement.querySelector(".mark-complete");
   markCompleteButton.textContent = "Uncheck";
+
+  if (currentUser) {
+    updateTaskInFirebase(taskId, task);
+  }
 }
 
 function markTaskUnComplete(taskElement) {
@@ -272,6 +308,35 @@ function markTaskUnComplete(taskElement) {
 
   const markCompleteButton = taskElement.querySelector(".mark-complete");
   markCompleteButton.textContent = "Mark as Completed";
+
+  if (currentUser) {
+    updateTaskInFirebase(taskId, task);
+  }
+}
+
+function markMeetingComplete(meetingElement) {
+  meetingElement.classList.add("completed");
+  const markCompleteButton = meetingElement.querySelector(".mark-complete");
+  markCompleteButton.textContent = "Uncheck";
+  const meeting = findMeetingById(meetingElement.id);
+  meeting.checked = true;
+
+  if (currentUser) {
+    updateMeetingInFirebase(meetingElement.id, meeting);
+  }
+}
+
+function markMeetingUnComplete(meetingElement) {
+  meetingElement.classList.remove("completed");
+  const markCompleteButton = meetingElement.querySelector(".mark-complete");
+  markCompleteButton.textContent = "Mark as Completed";
+
+  const meeting = findMeetingById(meetingElement.id);
+  meeting.checked = false;
+
+  if (currentUser) {
+    updateMeetingInFirebase(meetingElement.id, meeting);
+  }
 }
 
 function deleteTask(taskElement) {
@@ -284,7 +349,21 @@ function deleteTask(taskElement) {
   }
 
   if (currentUser) {
-    deleteTaskFromFirestore(taskId);
+    deleteTaskFromFirebase(taskId);
+  }
+}
+
+function deleteMeeting(meetingElement) {
+  const meetingId = meetingElement.id;
+  const meetingIndex = findMeetingIndexById(meetingId);
+
+  if (meetingIndex !== -1) {
+    currentMeetings.splice(meetingIndex, 1);
+    meetingElement.remove();
+  }
+
+  if (currentUser) {
+    deleteMeetingFromFirebase(meetingId);
   }
 }
 
@@ -295,6 +374,24 @@ function editTaskName(taskElement) {
     const task = findTaskById(taskId);
     task.name = newTaskName;
     taskElement.querySelector(".label-text").textContent = newTaskName;
+
+    if (currentUser) {
+      updateTaskInFirebase(taskId, task);
+    }
+  }
+}
+
+function editMeetingName(meetingElement) {
+  const newMeetingName = prompt("Enter new task name:");
+  if (newMeetingName) {
+    const meetingId = meetingElement.id;
+    const meeting = findMeetingById(meetingId);
+    meeting.name = newMeetingName;
+    meetingElement.querySelector(".task-name").textContent = newMeetingName;
+
+    if (currentUser) {
+      updateMeetingInFirebase(meetingId, meeting);
+    }
   }
 }
 
@@ -302,14 +399,16 @@ function findTaskById(id) {
   return currentTasks.find((task) => task.id === id);
 }
 
+function findMeetingById(id) {
+  return currentMeetings.find((meeting) => meeting.id === id);
+}
+
 function findTaskIndexById(id) {
   let index = currentTasks.findIndex((task) => task.id === id);
   return index;
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-  document.querySelector("#schedule-task-amount").innerHTML =
-    scheduleTasks.length;
-
-  renderScheduleTasks(scheduleTasks, ".right-content");
-});
+function findMeetingIndexById(id) {
+  let index = currentMeetings.findIndex((meeting) => meeting.id === id);
+  return index;
+}

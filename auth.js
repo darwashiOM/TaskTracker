@@ -12,6 +12,7 @@ import {
   collection,
   addDoc,
   getDocs,
+  getDoc,
   updateDoc,
   doc,
   deleteDoc,
@@ -70,7 +71,7 @@ async function addTaskToFirestore(task) {
   }
 }
 
-async function addMeetingToFirestore(task) {
+async function addMeetingToFirebase(task) {
   try {
     const docRef = await addDoc(
       collection(db, `users/${currentUser.uid}/meetings`),
@@ -83,17 +84,54 @@ async function addMeetingToFirestore(task) {
   }
 }
 
-async function updateTaskInFirestore(taskId, updatedData) {
+async function updateTaskInFirebase(taskId, updatedData) {
   try {
-    const taskRef = doc(db, `users/${currentUser.uid}/tasks`, taskId);
-    await updateDoc(taskRef, updatedData);
-    console.log("Task updated successfully!");
+    const tasksCollection = collection(db, `users/${currentUser.uid}/tasks`);
+    const tasksSnapshot = await getDocs(tasksCollection);
+    const updatePromises = tasksSnapshot.docs.map(async (taskDoc) => {
+      const taskData = taskDoc.data();
+
+      if (taskData.id === taskId) {
+        const taskRef = doc(db, `users/${currentUser.uid}/tasks`, taskDoc.id);
+        await updateDoc(taskRef, updatedData);
+        console.log(`Task with ID: ${taskId} got updated successfully!`);
+      }
+    });
+
+    await Promise.all(updatePromises);
   } catch (e) {
     console.error("Error updating task: ", e);
   }
 }
 
-async function deleteTaskFromFirestore(taskId) {
+async function updateMeetingInFirebase(meetingId, updatedData) {
+  try {
+    const meetingCollection = collection(
+      db,
+      `users/${currentUser.uid}/meetings`
+    );
+    const meetingsSnapshot = await getDocs(meetingCollection);
+    const updatePromises = meetingsSnapshot.docs.map(async (meetingDoc) => {
+      const meetingData = meetingDoc.data();
+
+      if (meetingData.id === meetingId) {
+        const taskRef = doc(
+          db,
+          `users/${currentUser.uid}/meetings`,
+          meetingDoc.id
+        );
+        await updateDoc(taskRef, updatedData);
+        console.log(`Task with ID: ${meetingId} got updated successfully!`);
+      }
+    });
+
+    await Promise.all(updatePromises);
+  } catch (e) {
+    console.error("Error updating task: ", e);
+  }
+}
+
+async function deleteTaskFromFirebase(taskId) {
   try {
     const tasksCollection = collection(db, `users/${currentUser.uid}/tasks`);
     const tasksSnapshot = await getDocs(tasksCollection);
@@ -107,9 +145,35 @@ async function deleteTaskFromFirestore(taskId) {
       }
     });
 
-    // Wait for all deletions to complete
     await Promise.all(deletePromises);
     console.log(taskId);
+    console.log("Task deleted successfully!");
+  } catch (e) {
+    console.error("Error deleting task: ", e);
+  }
+}
+
+async function deleteMeetingFromFirebase(meetingId) {
+  try {
+    const meetingCollection = collection(
+      db,
+      `users/${currentUser.uid}/meetings`
+    );
+    const meetingsSnapshot = await getDocs(meetingCollection);
+
+    const deletePromises = meetingsSnapshot.docs.map(async (meetingDoc) => {
+      const meetingData = meetingDoc.data();
+
+      if (meetingData.id === meetingId) {
+        await deleteDoc(
+          doc(db, `users/${currentUser.uid}/meetings`, meetingDoc.id)
+        );
+        console.log(`Deleted task with custom ID: ${meetingId}`);
+      }
+    });
+
+    await Promise.all(deletePromises);
+    console.log(meetingId);
     console.log("Task deleted successfully!");
   } catch (e) {
     console.error("Error deleting task: ", e);
@@ -174,9 +238,11 @@ onAuthStateChanged(auth, (user) => {
 
 export {
   addTaskToFirestore,
-  updateTaskInFirestore,
-  deleteTaskFromFirestore,
-  addMeetingToFirestore,
+  updateTaskInFirebase,
+  deleteTaskFromFirebase,
+  deleteMeetingFromFirebase,
+  addMeetingToFirebase,
+  updateMeetingInFirebase,
   currentUser,
 };
 
