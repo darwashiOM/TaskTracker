@@ -478,24 +478,6 @@ button {
   background-color: #3aa9a2;
 }
 
-#noteFields {
-  margin-top: 10px;
-}
-
-#noteTitle,
-#noteContent {
-  width: 100%;
-  margin-bottom: 10px;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-#noteContent {
-  height: 80px;
-  resize: none;
-}
-
 #google-sign-in,
 #sign-out {
   display: inline-block;

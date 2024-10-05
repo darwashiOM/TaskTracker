@@ -30,7 +30,6 @@
             <select id="taskEventSelect">
               <option value="task">Add Task</option>
               <option value="meeting">Schedule Meeting</option>
-              <option value="note">Add Note</option>
             </select>
 
             <!-- Task Fields -->
@@ -62,8 +61,11 @@
                 required
               />
 
-              <label for="meetingTime">Time:</label>
-              <input type="time" id="meetingTime" required />
+              <label for="meetingTime">Start Time:</label>
+              <input type="time" id="meetingStartTime" required />
+
+              <label for="meetingTime">End Time:</label>
+              <input type="time" id="meetingEndTime" required />
 
               <label for="meetingColor">Color:</label>
               <select id="meetingColor">
@@ -72,24 +74,6 @@
                 <option value="red" class="red">Red</option>
                 <option value="green" class="green">Green</option>
               </select>
-            </div>
-
-            <!-- Note Fields -->
-            <div id="noteFields" style="display: none">
-              <label for="noteTitle">Note Title:</label>
-              <input
-                type="text"
-                id="noteTitle"
-                placeholder="note title"
-                required
-              />
-
-              <label for="noteContent">Content:</label>
-              <textarea
-                id="noteContent"
-                placeholder="note content"
-                required
-              ></textarea>
             </div>
 
             <!-- Submit Button -->
@@ -105,20 +89,7 @@
       </div>
       <div class="page-content">
         <div class="header">Today Tasks</div>
-        <div class="content-categories">
-          <div class="label-wrapper">
-            <input class="nav-item" name="nav" type="radio" id="opt-1" />
-            <label class="category" for="opt-1">All</label>
-          </div>
-          <div class="label-wrapper">
-            <input class="nav-item" name="nav" type="radio" id="opt-3" />
-            <label class="category" for="opt-3">Notes</label>
-          </div>
-          <div class="label-wrapper">
-            <input class="nav-item" name="nav" type="radio" id="opt-4" />
-            <label class="category" for="opt-4">Trash</label>
-          </div>
-        </div>
+        <div class="content-categories"></div>
         <div class="tasks-wrapper">
           <div class="header upcoming">Upcoming Tasks</div>
         </div>

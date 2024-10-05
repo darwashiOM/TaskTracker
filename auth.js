@@ -17,7 +17,7 @@ import {
   deleteDoc,
 } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-import { addTasks } from "./script.js";
+import { addTasks, addMeeting } from "./script.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -70,6 +70,19 @@ async function addTaskToFirestore(task) {
   }
 }
 
+async function addMeetingToFirestore(task) {
+  try {
+    const docRef = await addDoc(
+      collection(db, `users/${currentUser.uid}/meetings`),
+      task
+    );
+    console.log("Task added with ID: ", docRef.id);
+    return docRef.id;
+  } catch (e) {
+    console.error("Error adding task: ", e);
+  }
+}
+
 async function updateTaskInFirestore(taskId, updatedData) {
   try {
     const taskRef = doc(db, `users/${currentUser.uid}/tasks`, taskId);
@@ -103,7 +116,7 @@ async function deleteTaskFromFirestore(taskId) {
   }
 }
 
-async function getTasksFromFirestore() {
+async function getTasksFromFirebase() {
   const tasks = [];
   try {
     const querySnapshot = await getDocs(
@@ -123,13 +136,34 @@ async function getTasksFromFirestore() {
   return tasks;
 }
 
+async function getMeetingsFromFirebase() {
+  const meetings = [];
+  try {
+    const querySnapshot = await getDocs(
+      collection(db, `users/${currentUser.uid}/meetings`)
+    );
+
+    querySnapshot.forEach((doc) => {
+      meetings.push({ id: doc.id, ...doc.data() });
+    });
+
+    console.log("found", meetings);
+  } catch (e) {
+    console.error("Error fetching meetings: ", e);
+  }
+
+  meetings.forEach((meeting) => addMeeting(meeting, false));
+  return meetings;
+}
+
 onAuthStateChanged(auth, (user) => {
   if (user) {
     currentUser = user;
     console.log(`User is signed in as ${user.displayName}`);
     signInButton.style.display = "none";
     signOutButton.style.display = "block";
-    getTasksFromFirestore();
+    getTasksFromFirebase();
+    getMeetingsFromFirebase();
   } else {
     currentUser = null;
     console.log("No user is signed in");
@@ -142,6 +176,7 @@ export {
   addTaskToFirestore,
   updateTaskInFirestore,
   deleteTaskFromFirestore,
+  addMeetingToFirestore,
   currentUser,
 };
 

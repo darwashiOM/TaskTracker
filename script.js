@@ -2,34 +2,25 @@ import {
   addTaskToFirestore,
   updateTaskInFirestore,
   deleteTaskFromFirestore,
+  addMeetingToFirestore,
   currentUser,
 } from "./auth.js";
 
 let currentTasks = [];
 
-let scheduleTasks = [
-  {
-    time: "08:00 - 09:00 AM",
-    name: "Product Review",
-    color: "yellow",
-  },
-  {
-    time: "10:00 - 11:00 AM",
-    name: "Design Meeting",
-    color: "blue",
-  },
-  {
-    time: "01:00 - 02:00 PM",
-    name: "Team Meeting",
-    color: "purble",
-  },
-];
+let scheduleTasks = [];
 
 const addButton = document.querySelector("#addButton");
 const taskEventSelect = document.querySelector("#taskEventSelect");
 const taskName = document.querySelector("#taskName");
 const taskStatus = document.querySelector("#taskStatus");
 const tasksWrapper = document.querySelector(".tasks-wrapper");
+
+const meetingName = document.querySelector("#meetingName");
+const meetingStartTime = document.querySelector("#meetingStartTime");
+const meetingEndTime = document.querySelector("#meetingEndTime");
+const meetingColor = document.querySelector("#meetingColor");
+const meetingWrapper = document.querySelector(".right-content");
 
 function createTaskTemplate(task) {
   return `
@@ -60,6 +51,18 @@ function createTaskTemplate(task) {
       `;
 }
 
+function createScheduleTaskTemplate(task) {
+  return `
+      <div class="task-box ${task.color}">
+        <div class="description-task">
+          <div class="time">${task.time}</div>
+          <div class="task-name">${task.name}</div>
+        </div>
+        <div class="more-button"></div>
+      </div>
+    `;
+}
+
 function generateUniqueID() {
   const timestamp = Date.now();
   const randomNum = Math.floor(Math.random() * 1e9);
@@ -87,16 +90,17 @@ export function addTasks(task, addFirebae = true) {
   }
 }
 
-function createScheduleTaskTemplate(task) {
-  return `
-      <div class="task-box ${task.color}">
-        <div class="description-task">
-          <div class="time">${task.time}</div>
-          <div class="task-name">${task.name}</div>
-        </div>
-        <div class="more-button"></div>
-      </div>
-    `;
+export function addMeeting(meeting, addFirebae = true) {
+  meetingWrapper.innerHTML += createScheduleTaskTemplate(meeting);
+
+  scheduleTasks.push(meeting);
+
+  if (currentUser && addFirebae) {
+    console.log("happened");
+    addMeetingToFirestore(meeting);
+  } else {
+    console.log("User is not signed in. Cannot add task to Firestore.");
+  }
 }
 
 function renderScheduleTasks(tasks, containerSelector) {
@@ -111,15 +115,9 @@ function renderAddingMenu() {
   if (selectedValue === "task") {
     taskFields.style.display = "block";
     meetingFields.style.display = "none";
-    noteFields.style.display = "none";
   } else if (selectedValue === "meeting") {
     taskFields.style.display = "none";
     meetingFields.style.display = "block";
-    noteFields.style.display = "none";
-  } else if (selectedValue === "note") {
-    taskFields.style.display = "none";
-    meetingFields.style.display = "none";
-    noteFields.style.display = "block";
   }
 }
 
@@ -136,6 +134,34 @@ function determineStatusClass(taskStatus) {
   }
 }
 
+function determinTime(startTime, endTime) {
+  let [startHour, startMinute] = startTime.split(":").map(Number);
+  let [endHour, endMinute] = endTime.split(":").map(Number);
+  if (
+    startHour > endHour ||
+    (startHour === endHour && startMinute > endMinute)
+  ) {
+    [startHour, startMinute, endHour, endMinute] = [
+      endHour,
+      endMinute,
+      startHour,
+      startMinute,
+    ];
+  }
+
+  function formatTime(hour, minute, addPeriod = false) {
+    const period = hour >= 12 ? "PM" : "AM";
+    hour = hour % 12 || 12;
+    minute = minute.toString().padStart(2, "0");
+    return `${hour}:${minute} ${addPeriod ? period : ""}`;
+  }
+
+  const formattedStartTime = formatTime(startHour, startMinute);
+  const formattedEndTime = formatTime(endHour, endMinute, true);
+
+  return `${formattedStartTime} - ${formattedEndTime}`;
+}
+
 taskEventSelect.addEventListener("change", renderAddingMenu);
 addButton.addEventListener("click", () => {
   switch (taskEventSelect.value) {
@@ -150,10 +176,28 @@ addButton.addEventListener("click", () => {
 
       addTasks(newTask);
       break;
+
     case "meeting":
-      console.log("meeting");
+      let newMeeting = {
+        id: `item-${generateUniqueID()}`,
+        name: meetingName.value,
+        time: determinTime(meetingStartTime.value, meetingEndTime.value),
+        color: meetingColor.value,
+        checked: false,
+      };
+
+      console.log(meetingStartTime.value);
+
+      addMeeting(newMeeting);
     case "note":
-      console.log("note");
+      let newNote = {
+        id: `item-${generateUniqueID()}`,
+        name: meetingName.value,
+        time: determinTime(meetingStartTime.value, meetingEndTime.value),
+        color: meetingColor.value,
+        checked: false,
+      };
+      addNotes();
   }
 });
 
@@ -267,5 +311,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.querySelector("#schedule-task-amount").innerHTML =
     scheduleTasks.length;
 
-  //renderScheduleTasks(scheduleTasks, ".right-content");
+  renderScheduleTasks(scheduleTasks, ".right-content");
 });
