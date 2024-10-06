@@ -259,7 +259,7 @@ function changeTaskStatus(taskElement) {
 }
 
 function changeMeetingColor(meetingElement) {
-  const newColor = prompt("Enter new color (red,, yellow, blue):");
+  const newColor = prompt("Enter new color (red, green, yellow, blue):");
   if (newColor) {
     meetingElement.className = `task-box ${newColor}`;
 

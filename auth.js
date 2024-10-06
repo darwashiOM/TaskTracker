@@ -35,7 +35,6 @@ function createGoogleSignInButton() {
     signInWithPopup(auth, provider)
       .then((result) => {
         currentUser = result.user;
-        console.log(`Hello, ${currentUser.displayName}`);
         signInButton.style.display = "none";
         signOutButton.style.display = "block";
       })
@@ -47,7 +46,6 @@ function createGoogleSignInButton() {
   signOutButton.addEventListener("click", () => {
     signOut(auth)
       .then(() => {
-        console.log("User signed out");
         currentUser = null;
         signInButton.style.display = "block";
         signOutButton.style.display = "none";
@@ -64,7 +62,6 @@ async function addTaskToFirestore(task) {
       collection(db, `users/${currentUser.uid}/tasks`),
       task
     );
-    console.log("Task added with ID: ", docRef.id);
     return docRef.id;
   } catch (e) {
     console.error("Error adding task: ", e);
@@ -77,7 +74,6 @@ async function addMeetingToFirebase(task) {
       collection(db, `users/${currentUser.uid}/meetings`),
       task
     );
-    console.log("Task added with ID: ", docRef.id);
     return docRef.id;
   } catch (e) {
     console.error("Error adding task: ", e);
@@ -94,7 +90,6 @@ async function updateTaskInFirebase(taskId, updatedData) {
       if (taskData.id === taskId) {
         const taskRef = doc(db, `users/${currentUser.uid}/tasks`, taskDoc.id);
         await updateDoc(taskRef, updatedData);
-        console.log(`Task with ID: ${taskId} got updated successfully!`);
       }
     });
 
@@ -121,7 +116,6 @@ async function updateMeetingInFirebase(meetingId, updatedData) {
           meetingDoc.id
         );
         await updateDoc(taskRef, updatedData);
-        console.log(`Task with ID: ${meetingId} got updated successfully!`);
       }
     });
 
@@ -141,13 +135,10 @@ async function deleteTaskFromFirebase(taskId) {
 
       if (taskData.id === taskId) {
         await deleteDoc(doc(db, `users/${currentUser.uid}/tasks`, taskDoc.id));
-        console.log(`Deleted task with custom ID: ${taskId}`);
       }
     });
 
     await Promise.all(deletePromises);
-    console.log(taskId);
-    console.log("Task deleted successfully!");
   } catch (e) {
     console.error("Error deleting task: ", e);
   }
@@ -173,8 +164,6 @@ async function deleteMeetingFromFirebase(meetingId) {
     });
 
     await Promise.all(deletePromises);
-    console.log(meetingId);
-    console.log("Task deleted successfully!");
   } catch (e) {
     console.error("Error deleting task: ", e);
   }
@@ -190,8 +179,6 @@ async function getTasksFromFirebase() {
     querySnapshot.forEach((doc) => {
       tasks.push({ id: doc.id, ...doc.data() });
     });
-
-    console.log("found", tasks);
   } catch (e) {
     console.error("Error fetching tasks: ", e);
   }
@@ -210,8 +197,6 @@ async function getMeetingsFromFirebase() {
     querySnapshot.forEach((doc) => {
       meetings.push({ id: doc.id, ...doc.data() });
     });
-
-    console.log("found", meetings);
   } catch (e) {
     console.error("Error fetching meetings: ", e);
   }
@@ -223,14 +208,12 @@ async function getMeetingsFromFirebase() {
 onAuthStateChanged(auth, (user) => {
   if (user) {
     currentUser = user;
-    console.log(`User is signed in as ${user.displayName}`);
     signInButton.style.display = "none";
     signOutButton.style.display = "block";
     getTasksFromFirebase();
     getMeetingsFromFirebase();
   } else {
     currentUser = null;
-    console.log("No user is signed in");
     signInButton.style.display = "block";
     signOutButton.style.display = "none";
   }
