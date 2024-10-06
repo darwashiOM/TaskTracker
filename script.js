@@ -84,7 +84,7 @@ function generateUniqueID() {
 
   return uniqueID;
 }
-export function addTasks(task) {
+export function addTasks(task, addToFirestore = true) {
   const upcomingTasksHeader = document.querySelector("div.header.upcoming");
   if (task.status != "Waiting") {
     upcomingTasksHeader.insertAdjacentHTML(
@@ -96,16 +96,16 @@ export function addTasks(task) {
   }
   currentTasks.push(task);
 
-  if (currentUser) {
+  if (currentUser && addToFirestore) {
     addTaskToFirestore(task);
   }
 }
 
-export function addMeeting(meeting) {
+export function addMeeting(meeting, addToFirestore = true) {
   meetingWrapper.innerHTML += createScheduleTaskTemplate(meeting);
   currentMeetings.push(meeting);
 
-  if (currentUser) {
+  if (currentUser && addToFirestore) {
     addMeetingToFirebase(meeting);
   }
   document.querySelector("#schedule-task-amount").innerHTML =
