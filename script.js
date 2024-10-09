@@ -1,15 +1,14 @@
 import {
-  addTaskToFirestore,
-  updateTaskInFirebase,
-  deleteTaskFromFirebase,
-  deleteMeetingFromFirebase,
-  addMeetingToFirebase,
-  updateMeetingInFirebase,
+  addTaskToDatabase,
+  updateTaskInDatabase,
+  deleteTaskFromDatabase,
+  deleteMeetingFromDatabase,
+  addMeetingToDatabase,
+  updateMeetingInDatabase,
   currentUser,
 } from "./auth.js";
 
 let currentTasks = [];
-
 let currentMeetings = [];
 
 const addButton = document.querySelector("#addButton");
@@ -81,10 +80,10 @@ function generateUniqueID() {
   const timestamp = Date.now();
   const randomNum = Math.floor(Math.random() * 1e9);
   const uniqueID = `${timestamp}-${randomNum}`;
-
   return uniqueID;
 }
-export function addTasks(task, addToFirestore = true) {
+
+export function addTasks(task, addToDatabase = true) {
   const upcomingTasksHeader = document.querySelector("div.header.upcoming");
   if (task.status != "Waiting") {
     upcomingTasksHeader.insertAdjacentHTML(
@@ -96,17 +95,17 @@ export function addTasks(task, addToFirestore = true) {
   }
   currentTasks.push(task);
 
-  if (currentUser && addToFirestore) {
-    addTaskToFirestore(task);
+  if ( && addToDatabase) {
+    addTaskToDatabase(task);
   }
 }
 
-export function addMeeting(meeting, addToFirestore = true) {
+export function addMeeting(meeting, addToDatabase = true) {
   meetingWrapper.innerHTML += createScheduleTaskTemplate(meeting);
   currentMeetings.push(meeting);
 
-  if (currentUser && addToFirestore) {
-    addMeetingToFirebase(meeting);
+  if ( && addToDatabase) {
+    addMeetingToDatabase(meeting);
   }
   document.querySelector("#schedule-task-amount").innerHTML =
     currentMeetings.length;
@@ -252,8 +251,8 @@ function changeTaskStatus(taskElement) {
     taskElement.querySelector(".tag").textContent = newStatus;
     taskElement.querySelector(".tag").className = `tag ${task.statusClass}`;
 
-    if (currentUser) {
-      updateTaskInFirebase(taskId, task);
+    if () {
+      updateTaskInDatabase(taskId, task);
     }
   }
 }
@@ -265,8 +264,8 @@ function changeMeetingColor(meetingElement) {
 
     const meeting = findMeetingById(meetingElement.id);
     meeting.color = newColor;
-    if (currentUser) {
-      updateMeetingInFirebase(meetingElement.id, meeting);
+    if () {
+      updateMeetingInDatabase(meetingElement.id, meeting);
     }
   }
 }
@@ -294,8 +293,8 @@ function markTaskComplete(taskElement) {
   const markCompleteButton = taskElement.querySelector(".mark-complete");
   markCompleteButton.textContent = "Uncheck";
 
-  if (currentUser) {
-    updateTaskInFirebase(taskId, task);
+  if () {
+    updateTaskInDatabase(taskId, task);
   }
 }
 
@@ -309,8 +308,8 @@ function markTaskUnComplete(taskElement) {
   const markCompleteButton = taskElement.querySelector(".mark-complete");
   markCompleteButton.textContent = "Mark as Completed";
 
-  if (currentUser) {
-    updateTaskInFirebase(taskId, task);
+  if () {
+    updateTaskInDatabase(taskId, task);
   }
 }
 
@@ -321,8 +320,8 @@ function markMeetingComplete(meetingElement) {
   const meeting = findMeetingById(meetingElement.id);
   meeting.checked = true;
 
-  if (currentUser) {
-    updateMeetingInFirebase(meetingElement.id, meeting);
+  if () {
+    updateMeetingInDatabase(meetingElement.id, meeting);
   }
 }
 
@@ -334,8 +333,8 @@ function markMeetingUnComplete(meetingElement) {
   const meeting = findMeetingById(meetingElement.id);
   meeting.checked = false;
 
-  if (currentUser) {
-    updateMeetingInFirebase(meetingElement.id, meeting);
+  if () {
+    updateMeetingInDatabase(meetingElement.id, meeting);
   }
 }
 
@@ -348,8 +347,8 @@ function deleteTask(taskElement) {
     taskElement.remove();
   }
 
-  if (currentUser) {
-    deleteTaskFromFirebase(taskId);
+  if () {
+    deleteTaskFromDatabase(taskId);
   }
 }
 
@@ -362,8 +361,8 @@ function deleteMeeting(meetingElement) {
     meetingElement.remove();
   }
 
-  if (currentUser) {
-    deleteMeetingFromFirebase(meetingId);
+  if () {
+    deleteMeetingFromDatabase(meetingId);
   }
 }
 
@@ -375,8 +374,8 @@ function editTaskName(taskElement) {
     task.name = newTaskName;
     taskElement.querySelector(".label-text").textContent = newTaskName;
 
-    if (currentUser) {
-      updateTaskInFirebase(taskId, task);
+    if () {
+      updateTaskInDatabase(taskId, task);
     }
   }
 }
@@ -390,7 +389,7 @@ function editMeetingName(meetingElement) {
     meetingElement.querySelector(".task-name").textContent = newMeetingName;
 
     if (currentUser) {
-      updateMeetingInFirebase(meetingId, meeting);
+      updateMeetingInDatabase(meetingId, meeting);
     }
   }
 }
