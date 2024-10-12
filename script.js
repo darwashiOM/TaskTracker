@@ -95,7 +95,7 @@ export function addTasks(task, addToDatabase = true) {
   }
   currentTasks.push(task);
 
-  if ( && addToDatabase) {
+  if (currentUser && addToDatabase) {
     addTaskToDatabase(task);
   }
 }
@@ -104,7 +104,7 @@ export function addMeeting(meeting, addToDatabase = true) {
   meetingWrapper.innerHTML += createScheduleTaskTemplate(meeting);
   currentMeetings.push(meeting);
 
-  if ( && addToDatabase) {
+  if (currentUser && addToDatabase) {
     addMeetingToDatabase(meeting);
   }
   document.querySelector("#schedule-task-amount").innerHTML =
@@ -251,7 +251,7 @@ function changeTaskStatus(taskElement) {
     taskElement.querySelector(".tag").textContent = newStatus;
     taskElement.querySelector(".tag").className = `tag ${task.statusClass}`;
 
-    if () {
+    if (currentUser) {
       updateTaskInDatabase(taskId, task);
     }
   }
@@ -264,7 +264,7 @@ function changeMeetingColor(meetingElement) {
 
     const meeting = findMeetingById(meetingElement.id);
     meeting.color = newColor;
-    if () {
+    if (currentUser) {
       updateMeetingInDatabase(meetingElement.id, meeting);
     }
   }
@@ -293,7 +293,7 @@ function markTaskComplete(taskElement) {
   const markCompleteButton = taskElement.querySelector(".mark-complete");
   markCompleteButton.textContent = "Uncheck";
 
-  if () {
+  if (currentUser) {
     updateTaskInDatabase(taskId, task);
   }
 }
@@ -308,7 +308,7 @@ function markTaskUnComplete(taskElement) {
   const markCompleteButton = taskElement.querySelector(".mark-complete");
   markCompleteButton.textContent = "Mark as Completed";
 
-  if () {
+  if (currentUser) {
     updateTaskInDatabase(taskId, task);
   }
 }
@@ -320,7 +320,7 @@ function markMeetingComplete(meetingElement) {
   const meeting = findMeetingById(meetingElement.id);
   meeting.checked = true;
 
-  if () {
+  if (currentUser) {
     updateMeetingInDatabase(meetingElement.id, meeting);
   }
 }
@@ -333,7 +333,7 @@ function markMeetingUnComplete(meetingElement) {
   const meeting = findMeetingById(meetingElement.id);
   meeting.checked = false;
 
-  if () {
+  if (currentUser) {
     updateMeetingInDatabase(meetingElement.id, meeting);
   }
 }
@@ -347,7 +347,7 @@ function deleteTask(taskElement) {
     taskElement.remove();
   }
 
-  if () {
+  if (currentUser) {
     deleteTaskFromDatabase(taskId);
   }
 }
@@ -361,7 +361,7 @@ function deleteMeeting(meetingElement) {
     meetingElement.remove();
   }
 
-  if () {
+  if (currentUser) {
     deleteMeetingFromDatabase(meetingId);
   }
 }
@@ -374,7 +374,7 @@ function editTaskName(taskElement) {
     task.name = newTaskName;
     taskElement.querySelector(".label-text").textContent = newTaskName;
 
-    if () {
+    if (currentUser) {
       updateTaskInDatabase(taskId, task);
     }
   }
