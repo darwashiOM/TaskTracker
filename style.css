@@ -387,7 +387,20 @@ button {
   text-decoration: underline;
 }
 
-#toggleForm:hover {
+#logoutButton {
+  
+  color: gray;
+  margin-left: 32px;
+  font-size: 15px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+#logout-container {
+	margin-top: 30px;
+}
+
+#toggleForm:hover, #logoutButton:hover {
   color: black;
 }
 

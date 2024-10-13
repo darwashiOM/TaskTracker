@@ -8,10 +8,11 @@ const loginForm = document.querySelector("#loginRegisterForm");
 const submitButton = document.querySelector("#submitButton");
 const logInRegesterWord = document.querySelector("#loginOrRigester");
 const message = document.getElementById("message");
-
+const logOut = document.querySelector("#logout-container")
 toggleButton.addEventListener("click", () => {
     message.textContent = '';
-    
+    document.getElementById("password").value = "";
+    document.getElementById("email").value = '';
     if (isLogin) {
     submitButton.textContent = "Register";
     logInRegesterWord.innerHTML = "Register";
@@ -28,22 +29,39 @@ loginForm.addEventListener("submit", function (e) {
 	const formData = new FormData(this);
         const endpoint = isLogin ? 'login.php' : 'register.php';
 
-        // Send an AJAX request to the PHP file
+        
         fetch(endpoint, {
           method: 'POST',
           body: formData,
         })
         .then(response => response.text())
         .then(data => {
-          // Display server response (success or error message)
+         
          
           message.textContent = data;
+	  document.getElementById("password").value = "";	
+          document.getElementById("email").value = "";
+         if (isLogin && data.includes('successful')) {
+            document.getElementById("login-register-container").style.display = 'none';
+            document.querySelector(".page-content").style.display = 'block';
+	    logOut.style.display = 'block';
+          }        })
+        .catch(error => console.error('Error:', error));
+      });
 
-          // If registration or login is successful, hide the form and show tasks
-          if (data.includes('successful')) {
-            document.getElementById("login-register-container").style.display = 'none'; // Hide form
-            document.querySelector(".page-content").style.display = 'block'; // Show task content
-          }
+
+
+logOut.addEventListener("click", function () {
+        fetch('logout.php', {
+          method: 'POST'
+        })
+        .then(response => response.text())
+        .then(data => {
+          document.getElementById("logout-container").style.display = 'none'; // Hide logout button
+          document.getElementById("login-register-container").style.display = 'block'; // Show login form
+          document.getElementById("message").textContent = data;
+	  document.getElementById("password").value = "";
+          document.getElementById("email").value = "";
         })
         .catch(error => console.error('Error:', error));
       });
